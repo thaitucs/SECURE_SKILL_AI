@@ -1,0 +1,27 @@
+#!/bin/sh
+# SECURE_CHECK - git pre-commit hook: block commits that contain secrets.
+# Install:  cp templates/ci/pre-commit-hook.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Set SKILL_DIR to where the SECURE_CHECK folder lives.
+
+SKILL_DIR="${SKILL_DIR:-tools/SECURE_CHECK}"
+PY="$(command -v python3 || command -v python)"
+
+if [ -z "$PY" ]; then
+  echo "secure-check: python not found, skipping secret scan" >&2
+  exit 0
+fi
+
+FILES=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$FILES" ] && exit 0
+
+# shellcheck disable=SC2086
+"$PY" "$SKILL_DIR/scripts/scan_secrets.py" --files $FILES --fail-on high
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+  echo ""
+  echo "secure-check: possible secret(s) in staged files (see above)."
+  echo "Move them to environment variables. To bypass for a false positive: git commit --no-verify"
+  exit 1
+fi
+exit 0

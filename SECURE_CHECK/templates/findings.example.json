@@ -1,0 +1,67 @@
+{
+  "project": "example-shop",
+  "partial": false,
+  "not_applicable": [],
+  "findings": [
+    {
+      "id": "FIX-01",
+      "severity": "critical",
+      "category": "secrets",
+      "title": "Stripe secret key in frontend bundle",
+      "file": "src/lib/payment.js",
+      "line": 12,
+      "status": "open",
+      "proposed_fix": true
+    },
+    {
+      "id": "FIX-02",
+      "severity": "high",
+      "category": "auth",
+      "title": "Order total computed in the browser and trusted by the API",
+      "file": "backend/routes/orders.js",
+      "line": 40,
+      "status": "open",
+      "proposed_fix": true
+    },
+    {
+      "id": "FIX-03",
+      "severity": "medium",
+      "category": "data_storage",
+      "title": "Product images stored as base64 in the products table",
+      "file": "backend/models/product.js",
+      "line": 18,
+      "status": "open",
+      "proposed_fix": true
+    },
+    {
+      "id": "SPAM-01",
+      "severity": "medium",
+      "category": "abuse",
+      "title": "Contact form has no server-side spam protection",
+      "file": "backend/routes/contact.js",
+      "line": 5,
+      "status": "open",
+      "proposed_fix": true
+    },
+    {
+      "id": "SPAM-04",
+      "severity": "low",
+      "category": "abuse",
+      "title": "Email address shown in plain text in the footer",
+      "file": "src/components/Footer.jsx",
+      "line": 22,
+      "status": "open",
+      "proposed_fix": true
+    },
+    {
+      "id": "FIX-04",
+      "severity": "low",
+      "category": "config",
+      "title": "X-Powered-By header not disabled",
+      "file": "backend/server.js",
+      "line": 3,
+      "status": "open",
+      "proposed_fix": true
+    }
+  ]
+}

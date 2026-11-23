@@ -1,0 +1,40 @@
+# SECURE_CHECK - QUICK mode in GitHub Actions
+# Copy to .github/workflows/secure-check.yml in your project.
+# Assumes the skill folder is committed at tools/SECURE_CHECK/ (adjust SKILL_DIR).
+# Fails the build when a CRITICAL finding (e.g. a leaked live key) is detected.
+
+name: secure-check
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  quick-scan:
+    runs-on: ubuntu-latest
+    env:
+      SKILL_DIR: tools/SECURE_CHECK
+    steps:
+      - uses: actions/checkout@v4   # pin to a commit SHA in security-sensitive repos
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run SECURE_CHECK scanners (stdlib only, no installs)
+        run: |
+          python "$SKILL_DIR/scripts/run_all.py" . \
+            --out secure-check-report/raw \
+            --fail-on critical
+
+      - name: Upload raw results (private to the repo)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-check-raw
+          path: secure-check-report/raw
+          retention-days: 7

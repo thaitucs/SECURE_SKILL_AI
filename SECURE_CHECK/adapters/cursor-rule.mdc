@@ -1,0 +1,21 @@
+---
+description: SECURE_CHECK - security audit, security score, frontend/backend file classification, project restructuring and code splitting, email/phone anti-spam. Use when the user asks to check security, audit, find leaked keys, reorganize or split code.
+globs:
+alwaysApply: false
+---
+
+<!-- Cursor: save as .cursor/rules/secure-check.mdc in your project.
+     Keep the SECURE_CHECK folder in the project (e.g. tools/SECURE_CHECK) and fix the path below. -->
+
+# SECURE_CHECK
+
+Read `tools/SECURE_CHECK/SKILL.md` and follow it exactly.
+
+Non-negotiable:
+- Default mode PLAN = read-only. Write reports to `secure-check-report/` and the highlighted
+  summary `secure-check-report/SECURE_CHECK_PLAN.txt`, then stop and wait for approval.
+- Apply only approved item IDs (`FIX-01`, `MOVE-02`, `SPLIT-01`, `DEL-01`, `SPAM-01`, `CFG-01`).
+- Create a git branch or backup before changes. Never hard-delete (use `_quarantine/`).
+- Never print full secrets (mask: first 4 + **** + last 4). Never push or deploy.
+- Target architecture: Client → Backend (logic, formulas, permissions) → Database (structured
+  data only) + File Storage (images, video, PDF).

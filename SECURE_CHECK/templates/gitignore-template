@@ -1,0 +1,89 @@
+# SECURE_CHECK .gitignore template
+# MERGE these lines into the project's existing .gitignore - never overwrite it.
+# Remove lines that would hide files the project really needs to commit.
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+key.properties
+local.properties
+id_rsa*
+*.ppk
+service-account*.json
+*-firebase-adminsdk-*.json
+credentials*.json
+config/master.key
+# .npmrc / .pypirc: ignore only if they contain tokens
+.npmrc
+.pypirc
+.netrc
+*.tfvars
+terraform.tfstate*
+.vscode/sftp.json
+sftp-config.json
+.ftpconfig
+
+# ---- Data / backups ----
+# Do NOT ignore *.sql globally - migrations are often .sql files.
+*dump*.sql
+*backup*.sql
+*.dump
+*.sqlite
+*.sqlite3
+# *.db   (enable if no committed .db files are needed)
+*.bak
+*.backup
+*.old
+*.orig
+*.swp
+*~
+/uploads/
+/storage/app/
+/storage/logs/
+
+# ---- Logs ----
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Build output / deps ----
+node_modules/
+vendor/
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+coverage/
+__pycache__/
+*.pyc
+.venv/
+venv/
+target/
+# .NET only (Rails/other projects commit bin/):
+# bin/
+# obj/
+.dart_tool/
+.gradle/
+Pods/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+
+# ---- SECURE_CHECK ----
+secure-check-report/

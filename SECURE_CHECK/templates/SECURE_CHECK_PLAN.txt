@@ -1,0 +1,175 @@
+================================================================================
+ SECURE_CHECK - SUMMARY PLAN
+ Project : {{project_name}}            Date: {{yyyy-mm-dd}}
+ Mode    : PLAN  -  NOTHING HAS BEEN CHANGED YET. Your approval is required.
+ Details : SECURITY_REPORT.md | FILE_MAP.md | REFACTOR_PLAN.md (same folder)
+================================================================================
+
+ HOW TO READ THIS FILE
+   !!!    CRITICAL   real risk right now - read first
+   !!     HIGH       fix soon
+   !      MEDIUM     needs attention
+   (i)    INFO       good to know
+   [?]    YOUR DECISION is needed
+   [YOU]  only YOU can do this (outside the code: dashboards, DNS, key rotation)
+   [DEL]  proposed removal -> moved to _quarantine/, never deleted permanently
+   >>>    start here
+
+################################################################################
+#                                                                              #
+#   SECURITY SCORE:  {{score}} / 100        GRADE: {{grade}}                         #
+#   [{{bar_20}}]                                                     #
+#   {{cap_line: e.g. "!!! Capped at 49 because 2 CRITICAL issues are open."}}  #
+#   After the proposed fixes: {{projected_score}} / 100 ({{projected_grade}})              #
+#                                                                              #
+################################################################################
+
+   Secrets & credentials        [{{bar}}] {{s}}/20  {{marker}}
+   Authentication & authz       [{{bar}}] {{s}}/20  {{marker}}
+   Input handling & injection   [{{bar}}] {{s}}/15  {{marker}}
+   Public exposure              [{{bar}}] {{s}}/10  {{marker}}
+   Database & file storage      [{{bar}}] {{s}}/10  {{marker}}
+   Configuration & transport    [{{bar}}] {{s}}/10  {{marker}}
+   Abuse & spam protection      [{{bar}}] {{s}}/10  {{marker}}
+   Dependencies                 [{{bar}}] {{s}}/5   {{marker}}
+   ({{n/a categories, or "partial review: <areas not reviewed>"}})
+
+--------------------------------------------------------------------------------
+ >>> READ THESE FIRST
+--------------------------------------------------------------------------------
+ 1. !!! {{most important problem, plain words}}                       -> FIX-01
+ 2. !!! [YOU] {{urgent action outside code, e.g. rotate leaked key}}  -> YOU-01
+ 3. !!  {{...}}                                                        -> FIX-02
+ 4. !   {{...}}                                                        -> SPAM-01
+ 5. (i) {{good news, e.g. "Passwords are hashed correctly with bcrypt."}}
+
+================================================================================
+ PART 1 - PROJECT AT A GLANCE
+================================================================================
+ Type        : {{static website | web app | API | mobile app | desktop | full-stack}}
+ Stack       : {{e.g. React (Vite) + Express + PostgreSQL (Prisma) + S3}}
+ Files       : {{n}} reviewed  ({{n}} ignored: node_modules, build ...)
+ Deploys to  : {{e.g. Vercel (frontend/dist), Render (backend)}}
+
+ Architecture check  (target: Client -> Backend -> Database + File Storage)
+   Frontend      [{{OK | MIXED | MISSING}}]  {{one-line reason}}
+   Backend       [{{OK | MIXED | MISSING | BaaS rules}}]  {{reason}}
+   Database      [{{OK | MIXED | NONE}}]     {{e.g. "!! images stored as base64 in DB"}}
+   File storage  [{{OK | MIXED | NONE}}]     {{e.g. "!! uploads saved in public/uploads"}}
+
+   NOW                                   PROPOSED
+   {{small ascii diagram of current}}    Client -> Backend -+-> Database
+                                                            +-> File Storage
+
+================================================================================
+ PART 2 - SECURITY PROBLEMS  ({{c}} critical, {{h}} high, {{m}} medium, {{l}} low)
+================================================================================
+ ############################################################################
+ # !!! FIX-01  {{title}}                                                    #
+ #     Where : {{file:line}}                                                #
+ #     Why it matters: {{one plain sentence - what an attacker can do}}     #
+ #     Fix   : {{one line}}                       Effort: {{S|M|L}}         #
+ ############################################################################
+
+ !!  FIX-02  {{title}}
+     Where: {{file:line}}   Why: {{...}}   Fix: {{...}}
+
+ !   FIX-03  {{title}}  ({{file}})  - {{one line}}
+
+ (low items, one line each)
+     FIX-0x  {{title}}
+
+================================================================================
+ PART 3 - FILE CLASSIFICATION (summary - full list in FILE_MAP.md)
+================================================================================
+   FE (frontend)       {{n}}      SHARED      {{n}}      CONFIG     {{n}}
+   BE (backend logic)  {{n}}      PRIVATE     {{n}}      GENERATED  {{n}}
+   BE:DB (database)    {{n}}      DOCS/TEST   {{n}}
+   BE:STORAGE (files)  {{n}}      CONFIRM?    {{n}}   [?] see below
+
+   Notable:
+   !!! {{file}}  is frontend but contains a secret            -> FIX-01
+   !!  {{file}}  frontend calculates the price/permission     -> MOVE-02
+   [?] {{file}}  unsure where it belongs - please tell me what it is used for
+
+================================================================================
+ PART 4 - PROPOSED STRUCTURE  (details: REFACTOR_PLAN.md)
+================================================================================
+   {{tree, max ~25 lines, only top folders + key files}}
+
+   MOVE-01  {{old path}}  ->  {{new path}}   ({{reason}})
+   MOVE-02  ...
+
+================================================================================
+ PART 5 - CODE SPLITTING  (no behaviour change)
+================================================================================
+   SPLIT-01  {{file}}  ({{mixes: UI + API + pricing + SQL}})
+             -> {{part 1 (job)}}
+             -> {{part 2 (job)}}
+   SPLIT-02  ...
+   (i) Files reviewed but kept as they are: {{file}} - {{why it is fine}}
+
+================================================================================
+ PART 6 - REMOVE FROM PUBLIC / DELETE CANDIDATES
+================================================================================
+   !!! CFG-01  {{.env}} is tracked by git / inside deploy folder -> untrack + .gitignore
+   [DEL] DEL-01  {{file}}  - {{evidence: not imported anywhere, duplicate of X}}
+   [DEL] DEL-02  ...
+   [?]   {{file}} - looks unused but might be loaded dynamically. Keep or remove?
+
+================================================================================
+ PART 7 - EMAIL / PHONE ANTI-SPAM   (applied only if you approve)
+================================================================================
+   Found: {{e.g. "contact@... shown in plain text on 6 pages (footer), phone
+           0909... in index.html and JSON-LD; contact form has no spam protection"}}
+
+   Why it matters: spam bots read the page SOURCE, not the screen. A visible
+   address/number is collected automatically and receives spam & scam calls.
+
+   SPAM-01  {{Recommended}}  {{e.g. Replace visible email with a protected form}}
+   SPAM-02  {{Recommended}}  {{Honeypot + time-trap + rate limit (server side)}}
+   SPAM-03                   {{Add Turnstile/hCaptcha  -> needs a free key [YOU]}}
+   SPAM-04                   {{Email click-to-reveal instead of plain text}}
+   SPAM-05                   {{Phone tap-to-reveal + use a business number}}
+   [YOU] Set up SPF / DKIM / DMARC for your email domain.
+
+   Trade-offs: {{e.g. "hiding the phone from JSON-LD may reduce local SEO - your choice"}}
+
+================================================================================
+ PART 8 - ONLY YOU CAN DO THIS  [YOU]
+================================================================================
+   !!! YOU-01  {{Rotate the leaked key at <provider> - it must be treated as stolen}}
+   !!  YOU-02  {{Remove secrets from git history (steps in SECURITY_REPORT.md)}}
+   !   YOU-03  {{Enable HTTPS / bucket Block Public Access / Firebase App Check ...}}
+
+================================================================================
+ PART 9 - ACTION LIST  &  YOUR DECISION
+================================================================================
+   ID        Sev   What                                   Effort  Change risk
+   --------  ----  -------------------------------------  ------  -----------
+   FIX-01    !!!   {{...}}                                S       Low
+   FIX-02    !!    {{...}}                                M       Med
+   CFG-01    !!!   {{...}}                                S       Low
+   MOVE-01   -     {{...}}                                M       Low
+   SPLIT-01  -     {{...}}                                M       Low
+   DEL-01    -     {{...}}                                S       Low
+   SPAM-01   !     {{...}}                                M       Low
+   --------------------------------------------------------------------------
+   Recommended now: {{FIX-01 FIX-02 CFG-01 SPAM-01 SPAM-02}}
+
+ ############################################################################
+ #  [?] HOW TO REPLY  (in chat, any language)                               #
+ #                                                                          #
+ #     APPROVE RECOMMENDED            -> apply the "Recommended now" set    #
+ #     APPROVE ALL                    -> apply everything above             #
+ #     APPROVE FIX-01 CFG-01 SPAM-02  -> apply only these                   #
+ #     APPROVE ALL EXCEPT DEL-01      -> everything except listed items     #
+ #     SKIP                           -> keep this report, change nothing   #
+ #                                                                          #
+ #  Before any change: a new git branch (or a backup copy) is created.      #
+ #  Removed files go to _quarantine/ - you delete them yourself.            #
+ ############################################################################
+
+ (i) This folder (secure-check-report/) describes your vulnerabilities.
+     Do NOT upload or deploy it. Proposed: add it to .gitignore (CFG item).
+================================================================================
