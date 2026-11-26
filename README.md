@@ -18,3 +18,8 @@ Quick start / Bắt đầu nhanh:
 2. Say / Nói với AI: **"Run SECURE_CHECK on this project"** / **"Chạy SECURE_CHECK cho dự án này"**.
 3. Read / Đọc `secure-check-report/SECURE_CHECK_PLAN.txt`, then reply / rồi trả lời
    `APPROVE RECOMMENDED`, `APPROVE FIX-01 SPAM-02 ...` or / hoặc `SKIP`.
+
+Everything the skill generates (`secure-check-report/`, `_quarantine/`, backups) stays on your
+machine and is never committed or pushed. /
+Mọi file skill sinh ra (`secure-check-report/`, `_quarantine/`, bản sao lưu) chỉ giữ trên máy
+bạn, không bao giờ được commit hay push lên git.

@@ -54,6 +54,10 @@ APPROVE <ids> / APPROVE ALL EXCEPT <ids> / SKIP).
 Markers: !!! critical, !! high, ! medium, (i) info, [?] decision needed, [YOU] user-only
 action, [DEL] proposed removal, >>> start here.
 
+Remind me that the plan and reports are LOCAL-ONLY: I should save them outside the repo or in a
+`secure-check-report/` folder containing a `.gitignore` with `*`, and never commit or push them.
+Never include them in files or commits you propose.
+
 Then STOP and wait for my approval. After I approve, apply only the approved IDs, one group
 at a time, give me complete changed files (or diffs), and a change log with how to undo.
 Reply in the language I use.

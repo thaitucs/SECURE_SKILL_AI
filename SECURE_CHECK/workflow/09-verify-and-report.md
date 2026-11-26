@@ -9,6 +9,7 @@
 2. Tests / lint / type-check if they exist.
 3. Re-run scanners: `python scripts/run_all.py <project> --out secure-check-report/raw`.
    Fixed secrets must no longer appear (in source **and** in a fresh build output).
+   `git status --porcelain` must show nothing under `secure-check-report/` or `_quarantine/`.
 4. Check imports: search for every old path of moved files - no references left.
 5. Check the deploy folder: none of the `never-public-files.md` items are inside it.
 6. Smoke-test key flows if you can run the app (login, main page, upload, form).
@@ -29,7 +30,15 @@ Mark fixed findings `"status": "fixed"` in `findings.json`, run `score.py` again
 - `[YOU]` items still open - especially key rotation and history cleanup.
 - Where the log is: `secure-check-report/CHANGES_LOG.md`.
 - How to undo: branch name / backup path.
-- Reminder: do not deploy `secure-check-report/` or `_quarantine/`.
+- Reminder: `secure-check-report/` and `_quarantine/` are local-only - not deployed, not
+  committed, not pushed.
 
 Do not commit or push unless the user asks. If they ask, commit per group with clear messages
-(`secure-check: FIX-01 move Stripe key to backend`).
+(`secure-check: FIX-01 move Stripe key to backend`), and:
+
+- Stage only the project files you changed, by explicit path. Never `git add -A`, `git add .`,
+  `git commit -a` or `git add -f`.
+- Before each commit run `git diff --cached --name-only`: no path under `secure-check-report/`,
+  `_quarantine/` or a backup folder may be listed. If one is, unstage it (`git restore --staged`).
+- Pushing the project still never pushes these generated files. If the user explicitly wants
+  the reports in git, explain that they describe vulnerabilities and let them do it themselves.

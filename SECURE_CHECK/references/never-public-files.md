@@ -27,7 +27,7 @@ to a public repository.
 | `*.har`, Postman/Insomnia exports, `*.http` with tokens | Captured auth headers | High |
 | `*.ipynb` with outputs | Data and keys in outputs | High |
 | Internal docs with credentials, `passwords.txt`, `accounts.xlsx`, `TODO_secret.md` | Obvious | Critical |
-| `secure-check-report/`, `_quarantine/` | Vulnerability details / unreviewed files | High |
+| `secure-check-report/`, `_quarantine/` | Vulnerability details / unreviewed files - local-only, must not be tracked by git either | High |
 | `node_modules/`, `vendor/` in web root | Attack surface, known-vulnerable files | Medium |
 | `composer.json/lock`, `package.json` in web root (PHP sites) | Version disclosure | Low |
 | `uploads/` that allows executing scripts | Remote code execution | Critical |

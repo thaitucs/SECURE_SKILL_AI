@@ -21,3 +21,6 @@ Rules:
 4. Business logic, formulas and permission checks belong in the backend. The database stores
    structured data only; images/video/PDF go to file storage, with metadata in the database.
 5. Code splitting must not change behaviour.
+6. Generated files (`secure-check-report/`, `_quarantine/`, backups) are local-only: each folder
+   gets a `.gitignore` containing `*`, is added to `.git/info/exclude`, and is never staged,
+   committed or pushed.

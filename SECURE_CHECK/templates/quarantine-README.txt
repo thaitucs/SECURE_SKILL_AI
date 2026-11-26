@@ -5,7 +5,11 @@ These files were moved here (not deleted) because you approved the DEL-* items b
 Check that the app still works for a while, then delete this folder yourself.
 Do NOT deploy this folder.
 
-To restore a file: move it back to its original path (or `git mv` it back).
+LOCAL-ONLY: this folder ignores itself (_quarantine/.gitignore = *) and is listed in
+.git/info/exclude. It is never committed or pushed - it exists only on this machine.
+
+To restore a file: move it back to its original path (git tracks it again as before), or
+`git checkout <commit-before-change> -- <original path>`.
 
 ID       Original path                     Moved on     Reason / evidence
 -------  --------------------------------  -----------  ------------------------------------

@@ -22,6 +22,9 @@ security, or protect displayed emails/phone numbers from spam:
    (`APPROVE FIX-01 ...`).
 4. Never change, move or delete project files before approval. Never print full secrets.
    Never hard-delete - use `_quarantine/`. Never push or deploy.
+5. Everything SECURE_CHECK generates (`secure-check-report/`, `_quarantine/`, backups) is
+   LOCAL-ONLY: give each folder a `.gitignore` containing `*`, add them to `.git/info/exclude`,
+   and never stage, commit or push them (see `SECURE_CHECK/workflow/01-safety-and-modes.md` 1.5).
 
 Optional helper scripts (Python 3 standard library only):
 `python SECURE_CHECK/scripts/run_all.py . --out secure-check-report/raw`

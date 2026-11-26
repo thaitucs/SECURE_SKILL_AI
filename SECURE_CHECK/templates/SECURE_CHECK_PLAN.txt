@@ -171,5 +171,6 @@
  ############################################################################
 
  (i) This folder (secure-check-report/) describes your vulnerabilities.
-     Do NOT upload or deploy it. Proposed: add it to .gitignore (CFG item).
+     It is LOCAL-ONLY: it ignores itself (.gitignore = *) and is listed in
+     .git/info/exclude, so it is never committed or pushed. Do NOT upload or deploy it.
 ================================================================================

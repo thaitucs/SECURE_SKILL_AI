@@ -55,7 +55,7 @@ SPLIT-01  {{file}}  ({{size}}, mixes: {{responsibilities}})
 
 | ID | File | Change |
 |----|------|--------|
-| CFG-01 | `.gitignore` | add `.env*`, `secure-check-report/`, keys |
+| CFG-01 | `.gitignore` | add `.env*`, keys (+ optional `secure-check-report/`, `_quarantine/` - already local-only) |
 
 ## 6. Execution order
 

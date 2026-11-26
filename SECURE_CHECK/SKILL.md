@@ -35,6 +35,13 @@ Read only the files you need for the project in front of you.
 9. **When unsure, ask.** Label the item `CONFIRM?` and ask. Never guess on deletes or on
    which side (frontend/backend) sensitive code belongs.
 10. **Be honest.** If a check was skipped or a build/test fails, say so with the output.
+11. **Generated files stay local - never committed, never pushed.** Everything SECURE_CHECK
+    creates (`secure-check-report/` with all reports, `raw/` and `CHANGES_LOG.md`,
+    `_quarantine/`, backup copies) is for the user's machine only. Make the folders ignore
+    themselves the moment you create them, never `git add` them, and never let them into a
+    commit or push - even when the user asks you to commit or push the project. If the user
+    wants a copy in git anyway, they do it themselves. Details: `workflow/01-safety-and-modes.md` 1.5.
+    (Code fixes the user approved in `APPLY` are project changes, not generated files.)
 
 ---
 
@@ -161,9 +168,21 @@ secure-check-report/
   raw/                    <- (optional) script output in JSON
 ```
 
-Templates are in `templates/`. Warn the user that `secure-check-report/` describes
-vulnerabilities and must never be deployed or published (propose adding it to `.gitignore`
-as a `CFG` item).
+Templates are in `templates/`.
+
+**Local-only (golden rule 11).** `secure-check-report/` describes vulnerabilities and must never
+be deployed, published, committed or pushed. As soon as you create it (or `_quarantine/`):
+
+1. Write `<folder>/.gitignore` containing `*` - the folder ignores itself. This is allowed in
+   every mode because it is inside the skill's own output folder.
+2. In a git repo, also add `/secure-check-report/` and `/_quarantine/` to `.git/info/exclude`
+   (local to this clone, never committed).
+3. Check `git ls-files secure-check-report _quarantine`. If anything is already tracked, tell the
+   user it will be pushed and propose `git rm -r --cached ...` as a `CFG` item (files stay on
+   disk). If it was already pushed, add a `YOU-` item: it is in the remote history.
+
+`scripts/run_all.py` does 1-3 automatically. Adding the folders to the project's tracked
+`.gitignore` is optional extra hygiene for collaborators (a `CFG` item, needs approval).
 
 **Language:** this skill is written in English. Write reports in the language the user is
 speaking. Keep markers (`!!!`, `!!`, `[?]`), IDs (`FIX-01`) and file paths unchanged.

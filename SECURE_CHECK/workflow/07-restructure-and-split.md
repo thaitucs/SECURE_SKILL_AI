@@ -7,6 +7,7 @@ working.
 
 1. Re-read the approved IDs. List them back to the user in one line.
 2. Create the branch / backup (step 1.3). If not possible, stop and ask.
+   Make sure the backup copy is outside the project and outside any repo (step 1.5).
 3. Record the baseline: does the project build/test **before** changes? Save the output.
    If it already fails, tell the user - later failures must be compared with this baseline.
 
@@ -71,13 +72,20 @@ Follow `references/splitting-patterns.md`. Core rules:
 
 ```
 _quarantine/
+  .gitignore                 <- "*" : the folder is LOCAL-ONLY (step 1.5), never committed
   README.txt                 <- list: original path, reason, date, item ID, how to restore
   <original/relative/path>   <- same relative path as before
 ```
 
-- Use `git mv` into `_quarantine/` so it can be restored.
-- Add `_quarantine/` to `.gitignore`? **No** - keep it tracked until the user deletes it, but
-  make sure it is excluded from deploy/build (note this in the log).
+- Create `_quarantine/.gitignore` (same content as in step 1.5) **before** moving anything in,
+  and check `/_quarantine/` is in `.git/info/exclude`.
+- Move with a normal file move, **not** `git mv` - `git mv` would track the quarantined copy
+  and it would be pushed. Git then records only the removal of the original path; the copy
+  stays on disk, untracked and ignored.
+- Restore: move the file back to its original path (it is tracked again as before), or
+  `git checkout <commit-before-change> -- <path>`. Write the restore command for each file in
+  `README.txt` and the log.
+- Make sure `_quarantine/` is also excluded from deploy/build (note this in the log).
 - Files that must not be public but are still needed (e.g. a DB dump the user wants to keep)
   go outside the deploy folder, not into quarantine - follow the item's wording.
 

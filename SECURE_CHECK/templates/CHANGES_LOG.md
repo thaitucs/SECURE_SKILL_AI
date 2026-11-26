@@ -28,4 +28,4 @@ Before **{{x}}/100 ({{g}})** → after **{{y}}/100 ({{g}})**
 
 - Fill the new variables in your real `.env`: {{list}}
 - `_quarantine/` contains {{n}} files - review and delete when sure.
-- Do not deploy `secure-check-report/` or `_quarantine/`.
+- `secure-check-report/` and `_quarantine/` are local-only: never deploy, commit or push them.

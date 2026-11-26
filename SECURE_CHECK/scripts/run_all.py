@@ -4,6 +4,9 @@
 Read-only for the project: it only writes JSON/TXT into --out
 (default: <project>/secure-check-report/raw). Standard library only, no network.
 
+Local-only: the report folder gets its own `.gitignore` (`*`) and is added, with
+`_quarantine/`, to `.git/info/exclude`, so generated files are never committed or pushed.
+
 Outputs:
   inventory.json  secrets.json  exposure.json  contacts.json  code-risks.json
   split-candidates.json
@@ -25,7 +28,9 @@ import scan_contacts  # noqa: E402
 import scan_exposure  # noqa: E402
 import scan_secrets  # noqa: E402
 import score  # noqa: E402
-from _common import setup_console, severity_at_least, write_json, SEVERITY_ORDER  # noqa: E402
+from _common import (  # noqa: E402
+    ensure_local_only, setup_console, severity_at_least, tracked_outputs, write_json, SEVERITY_ORDER,
+)
 
 
 def main(argv=None):
@@ -43,6 +48,7 @@ def main(argv=None):
         return 2
     out = Path(args.out).resolve() if args.out else root / "secure-check-report" / "raw"
     out.mkdir(parents=True, exist_ok=True)
+    ensure_local_only(out)
 
     print("SECURE_CHECK scanners - project: %s" % root)
     print("results -> %s\n" % out)
@@ -96,6 +102,13 @@ def main(argv=None):
         counts[f["severity"]] = counts.get(f["severity"], 0) + 1
     print("\nleads: " + ", ".join("%s=%d" % (k, counts[k]) for k in ("critical", "high", "medium", "low", "info") if k in counts))
     print("(i) secure-check-report/ describes vulnerabilities - do not deploy or publish it.")
+    print("(i) Generated files are LOCAL-ONLY: git ignores secure-check-report/ and _quarantine/.")
+    tracked = tracked_outputs(root)
+    if tracked:
+        print("(!) These SECURE_CHECK files are already tracked by git and WILL be pushed:")
+        for t in tracked[:20]:
+            print("      " + t)
+        print("    Untrack them (files stay on disk): git rm -r --cached secure-check-report _quarantine")
 
     if args.fail_on and any(severity_at_least(f["severity"], args.fail_on) for f in merged):
         return 1

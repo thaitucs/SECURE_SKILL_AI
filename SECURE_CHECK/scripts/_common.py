@@ -167,8 +167,103 @@ def in_build_dir(rel):
 def write_json(path, data):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_local_only(path.parent)
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2, ensure_ascii=False)
+
+
+# --------------------------------------------------------------------------------------
+# Local-only outputs: everything SECURE_CHECK generates stays on the user's machine.
+# --------------------------------------------------------------------------------------
+
+REPORT_DIR_NAME = "secure-check-report"
+QUARANTINE_DIR_NAME = "_quarantine"
+LOCAL_ONLY_GITIGNORE = (
+    "# SECURE_CHECK: this folder is generated and LOCAL-ONLY.\n"
+    "# It must never be committed or pushed. This file makes git ignore the whole folder.\n"
+    "*\n"
+)
+_local_only_done = set()
+
+
+def _git_exclude_file(start):
+    """Return <repo>/.git/info/exclude for the repo containing `start`, or None."""
+    for d in [start] + list(start.parents):
+        dot_git = d / ".git"
+        if dot_git.is_dir():
+            return d, dot_git / "info" / "exclude"
+        if dot_git.is_file():  # worktree / submodule: "gitdir: <path>"
+            try:
+                line = dot_git.read_text(encoding="utf-8", errors="replace").strip()
+            except OSError:
+                return None
+            if not line.startswith("gitdir:"):
+                return None
+            gitdir = Path(line[len("gitdir:"):].strip())
+            if not gitdir.is_absolute():
+                gitdir = (d / gitdir).resolve()
+            common = gitdir / "commondir"
+            if common.is_file():
+                try:
+                    gitdir = (gitdir / common.read_text(encoding="utf-8").strip()).resolve()
+                except OSError:
+                    pass
+            return d, gitdir / "info" / "exclude"
+    return None
+
+
+def ensure_local_only(directory):
+    """Keep SECURE_CHECK output out of git without touching tracked project files.
+
+    1. Writes `<secure-check-report>/.gitignore` containing `*` (the folder ignores itself).
+    2. Adds the report folder and `_quarantine/` to `.git/info/exclude` (local, never committed).
+
+    Only acts when `directory` is, or is inside, a folder named `secure-check-report`, so a
+    custom --out can never end up ignoring the project itself. Never raises.
+    """
+    try:
+        directory = Path(directory).resolve()
+        report = next((p for p in [directory] + list(directory.parents) if p.name == REPORT_DIR_NAME), None)
+        if report is None or report in _local_only_done:
+            return
+        _local_only_done.add(report)
+        report.mkdir(parents=True, exist_ok=True)
+        gi = report / ".gitignore"
+        if not gi.exists():
+            gi.write_text(LOCAL_ONLY_GITIGNORE, encoding="utf-8")
+
+        found = _git_exclude_file(report.parent)
+        if not found:
+            return
+        repo_root, exclude = found
+        project_rel = report.parent.relative_to(repo_root).as_posix()
+        prefix = "/" if project_rel == "." else "/%s/" % project_rel
+        wanted = [prefix + REPORT_DIR_NAME + "/", prefix + QUARANTINE_DIR_NAME + "/"]
+        existing = exclude.read_text(encoding="utf-8", errors="replace").splitlines() if exclude.exists() else []
+        missing = [w for w in wanted if w not in existing]
+        if missing:
+            exclude.parent.mkdir(parents=True, exist_ok=True)
+            with open(exclude, "a", encoding="utf-8") as fh:
+                if existing and existing[-1].strip():
+                    fh.write("\n")
+                fh.write("# SECURE_CHECK - generated, local-only (never commit or push)\n")
+                fh.write("\n".join(missing) + "\n")
+    except Exception as exc:  # protection is best effort; never break a scan
+        print("(!) could not mark %s as local-only: %s" % (directory, exc), file=sys.stderr)
+
+
+def tracked_outputs(root):
+    """List SECURE_CHECK output files that git already tracks (they would be pushed)."""
+    try:
+        res = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--", REPORT_DIR_NAME, QUARANTINE_DIR_NAME],
+            capture_output=True, text=True, timeout=30,
+        )
+    except Exception:
+        return []
+    if res.returncode != 0:
+        return []
+    return [line for line in res.stdout.splitlines() if line.strip()]
 
 
 def make_finding(fid, severity, category, title, file=None, line=None, evidence=None,

@@ -164,6 +164,23 @@ _quarantine/              after APPLY: files set aside for you to delete
 
 > `secure-check-report/` describes your vulnerabilities. **Never deploy or publish it.**
 
+### Generated files stay on your machine (local-only)
+
+Everything SECURE_CHECK generates - `secure-check-report/` (plan, reports, `CHANGES_LOG.md`,
+`raw/`), `_quarantine/` and backup copies - is **never committed or pushed to git**:
+
+- Each folder gets its own `.gitignore` containing `*`, so git ignores the whole folder
+  (including that file). Your project's `.gitignore` is not touched.
+- In a git repo, the folders are also added to `.git/info/exclude` (local to your clone,
+  never committed).
+- The AI never stages these files, even when you ask it to commit or push the project.
+  Quarantined files are moved with a normal move, not `git mv`, so they stay untracked.
+- Backup copies are created outside the project folder. The `secure-check/<date>` branch is
+  never pushed by the AI.
+- If an older run was already committed, the plan warns you and proposes
+  `git rm -r --cached secure-check-report _quarantine` (files stay on disk).
+- `templates/ci/pre-commit-hook.sh` also blocks any commit that contains these folders.
+
 ## 7. Security score
 
 | Category | Weight |
@@ -185,7 +202,8 @@ Full rules: `references/scoring-rubric.md`.
 ## 8. Helper scripts (optional, for developers)
 
 Python 3.8+, **standard library only** (no `pip install`), no network access. They only read
-the project and write into `secure-check-report/raw/`.
+the project and write into `secure-check-report/raw/` (plus the local-only `.gitignore` and
+`.git/info/exclude` entries).
 
 ```bash
 # everything (inventory, secrets, exposure, contacts, code risks, split candidates, score)
@@ -208,7 +226,8 @@ Script hits are **leads**. The AI (or you) must confirm each one by reading the 
 final score uses verified findings only.
 
 **CI and git hooks:** `templates/ci/github-actions-secure-check.yml` (GitHub Actions) and
-`templates/ci/pre-commit-hook.sh` (blocks commits that contain secrets).
+`templates/ci/pre-commit-hook.sh` (blocks commits that contain secrets or SECURE_CHECK's
+generated files).
 
 ## 9. Safety guarantees
 
@@ -218,6 +237,8 @@ final score uses verified findings only.
 - Secrets are always masked (`sk_l****9xQa`).
 - No code or secrets are sent to outside services. No attacks on live sites, no deploys,
   no pushes.
+- Everything the skill generates (reports, plan, quarantine, backups) stays local - it is
+  never committed or pushed.
 - Restructuring and splitting do not change how the app behaves.
 - Honest reporting: skipped checks and failed builds/tests are reported as such.
 
@@ -398,6 +419,23 @@ _quarantine/              sau khi thực hiện: file được cách ly chờ b�
 
 > Thư mục `secure-check-report/` mô tả các lỗ hổng của bạn. **Không bao giờ deploy hay public thư mục này.**
 
+### File do skill sinh ra chỉ giữ trên máy bạn (local-only)
+
+Mọi thứ SECURE_CHECK sinh ra - `secure-check-report/` (kế hoạch, báo cáo, `CHANGES_LOG.md`,
+`raw/`), `_quarantine/` và bản sao lưu - **không bao giờ được commit hay push lên git**:
+
+- Mỗi thư mục có một file `.gitignore` riêng chứa `*`, nên git bỏ qua toàn bộ thư mục (kể cả
+  chính file đó). File `.gitignore` của dự án không bị đụng tới.
+- Trong repo git, các thư mục này còn được thêm vào `.git/info/exclude` (chỉ có ở máy bạn,
+  không bao giờ được commit).
+- AI không bao giờ `git add` các file này, kể cả khi bạn yêu cầu commit hoặc push dự án.
+  File cách ly được chuyển bằng lệnh di chuyển thường, không dùng `git mv`, nên không bị git theo dõi.
+- Bản sao lưu được tạo bên ngoài thư mục dự án. Nhánh `secure-check/<ngày>` không bao giờ
+  được AI push.
+- Nếu lần chạy trước đã lỡ commit báo cáo, kế hoạch sẽ cảnh báo và đề xuất
+  `git rm -r --cached secure-check-report _quarantine` (file vẫn giữ trên máy).
+- `templates/ci/pre-commit-hook.sh` cũng chặn mọi commit có chứa các thư mục này.
+
 ## 7. Chấm điểm bảo mật
 
 | Hạng mục | Trọng số |
@@ -419,7 +457,8 @@ Quy tắc đầy đủ: `references/scoring-rubric.md`.
 ## 8. Script hỗ trợ (tùy chọn, cho lập trình viên)
 
 Python 3.8+, **chỉ dùng thư viện chuẩn** (không cần `pip install`), không kết nối mạng.
-Script chỉ đọc dự án và ghi kết quả vào `secure-check-report/raw/`.
+Script chỉ đọc dự án và ghi kết quả vào `secure-check-report/raw/` (kèm file `.gitignore`
+local-only và dòng trong `.git/info/exclude`).
 
 ```bash
 # chạy tất cả (kiểm kê, secret, file public, liên hệ, code rủi ro, gợi ý tách file, điểm)
@@ -442,7 +481,7 @@ Kết quả của script chỉ là **gợi ý**. AI (hoặc bạn) phải đọc
 điểm cuối cùng chỉ tính các lỗi đã được xác minh.
 
 **CI và git hook:** `templates/ci/github-actions-secure-check.yml` (GitHub Actions) và
-`templates/ci/pre-commit-hook.sh` (chặn commit có chứa secret).
+`templates/ci/pre-commit-hook.sh` (chặn commit có chứa secret hoặc file do SECURE_CHECK sinh ra).
 
 ## 9. Cam kết an toàn
 
@@ -452,6 +491,8 @@ Kết quả của script chỉ là **gợi ý**. AI (hoặc bạn) phải đọc
 - Secret luôn được che (`sk_l****9xQa`).
 - Không gửi code hay secret ra dịch vụ bên ngoài. Không tấn công thử web đang chạy, không
   deploy, không push.
+- Mọi file skill sinh ra (báo cáo, kế hoạch, khu cách ly, bản sao lưu) chỉ giữ ở máy bạn -
+  không bao giờ được commit hay push lên git.
 - Sắp xếp lại và tách code không làm thay đổi cách app hoạt động.
 - Báo cáo trung thực: kiểm tra nào bị bỏ qua, build/test nào lỗi đều được ghi rõ.
 

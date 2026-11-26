@@ -85,5 +85,6 @@ Thumbs.db
 desktop.ini
 .idea/
 
-# ---- SECURE_CHECK ----
+# ---- SECURE_CHECK (generated, local-only - never commit or push) ----
 secure-check-report/
+_quarantine/

@@ -17,5 +17,8 @@ Non-negotiable:
 - Apply only approved item IDs (`FIX-01`, `MOVE-02`, `SPLIT-01`, `DEL-01`, `SPAM-01`, `CFG-01`).
 - Create a git branch or backup before changes. Never hard-delete (use `_quarantine/`).
 - Never print full secrets (mask: first 4 + **** + last 4). Never push or deploy.
+- Generated files (`secure-check-report/`, `_quarantine/`, backups) are local-only: each folder
+  gets a `.gitignore` with `*`, is added to `.git/info/exclude`, and is never staged, committed
+  or pushed.
 - Target architecture: Client → Backend (logic, formulas, permissions) → Database (structured
   data only) + File Storage (images, video, PDF).
